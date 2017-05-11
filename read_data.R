@@ -1,5 +1,3 @@
-# Read data from spectral intensity table. Find row and column names and return
-# the dataframe with proper row/column names.
 get_spectral_file <- function(filename) {
     # Reads the bucket table file.
     library(data.table)
@@ -45,6 +43,9 @@ cleanup_cols <- function(dataframe, t = "min") {
     if (t == "s") {
         pattern = "(\\d+.\\d+)s : (\\d+.\\d+)m\\/z"
     }
+    else {
+        pattern = "(\\d+.\\d+)min : (\\d+.\\d+)m\\/z"
+    }
     colnames(dataframe) = str_replace(
         string = colnames(dataframe),
         pattern = pattern,
@@ -75,3 +76,13 @@ cleanup_rows <- function(dataframe,
     }
     return(dataframe)
 }
+#' Read spectral intensity table.
+#'
+#' \code{get_spectral_file} reads the spectral intensity txt file and returns
+#' the entire file as a data frame.
+#'
+#'  @param filename Name of the file - must be in the same directory or the full
+#'  path.
+#'  @return spectral_file returns the txt file specified by \code{filename}.
+#'  @example
+#'  get_spectral_file("abcd.txt")
