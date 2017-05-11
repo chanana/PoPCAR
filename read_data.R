@@ -13,18 +13,18 @@ get_spectral_file <- function(filename) {
 
 replicate_remover <- function(spectral_data, replicates) {
     # Removes the replicates by averaging them into one line (row).
+    rows = nrow(spectral_data)
+    cols = ncol(spectral_data)
     temp_matrix = matrix(
-        data = rep(
-            NA,
-            nrow(spectral_data) * ncol(spectral_data) / replicates
-        ),
-        nrow = nrow(spectral_data) / replicates,
-        ncol = ncol(spectral_data)
+        data = rep(NA, rows * cols / replicates),
+        nrow = rows / replicates,
+        ncol = cols
     )
-    for (i in 1:(nrow(spectral_data) / replicates)) {
-        temp_matrix[i,] =
-            colMeans(temp_matrix[(replicates * i - replicates + 1):(replicates * i),])
+    for (i in 1:(rows / replicates)) {
+        temp_matrix[i, ] =
+            colMeans(spectral_data[(replicates * i - replicates + 1):(replicates * i),])
     }
+    colnames(temp_matrix) = colnames(spectral_data)
     return(as.data.frame(temp_matrix))
 }
 
