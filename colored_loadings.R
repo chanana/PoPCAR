@@ -29,10 +29,6 @@ colored_loadings <- function(PCA, PCx = 1, PCy = 2, npoints = 2000, ntimes = 3) 
         legend = v,
         fill = c,
         border = "black",
-        # bg = "black",
-        text.font = 2,
-        x.intersp = 0.5,
-        y.intersp = 0.5
-        # cex = 0.75
+        title = "Points per color"
     )
 }

@@ -153,7 +153,7 @@ tiff(
     res = 300
 )
 source("~/Programming/R/PoPCAR/colored_loadings.R")
-colored_loadings(PCA = fd.pca, ntimes = 4)
+colored_loadings(PCA = fd.pca, ntimes = 7, npoints = 1000, PCx = 10, PCy = 8)
 dev.off()
 
 ### Highest PCs
