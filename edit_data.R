@@ -8,13 +8,13 @@ add_mass_column <-
         return(dataframe)
     }
 
-ParetoScale <- function(x, column = 2) {
+pareto_scale <- function(matrix, column = 2) {
     # Returns the pareto scaled version of the each column/row of the matrix.
     return(apply(
-        X = x,
+        X = matrix,
         MARGIN = column,
-        FUN = function(j)
-            (j - mean(j)) / sqrt(sd(j))
+        FUN = function(x)
+            (x - mean(x)) / sqrt(sd(x))
     ))
 }
 
@@ -27,3 +27,8 @@ add_euclidean_distance <-
         dataframe$ed = sqrt(x ^ 2 + y ^ 2)
         return(dataframe)
     }
+
+fd.sort <- function(x) {
+    sorted = sort(x, decreasing = T, index.return = T)
+    return(sorted)
+}
