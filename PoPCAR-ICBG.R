@@ -4,7 +4,10 @@ library(stringr)
 library(xlsx)
 library(colorspace)
 # Definitions
-setwd("~/Lab/Bucket Tables/")
+setwd("~/Lab/bucket_tables/")
+source("~/Programming/R/PoPCAR/read_data.R")
+source("~/Programming/R/PoPCAR/edit_data.R")
+source("~/Programming/R/PoPCAR/colored_loadings.R")
 # bucket_table_name = "A133-B531.txt"
 # bucket_table_name = "smaller-dataset-bucket.txt"
 bucket_table_name = "Hits-All3Media.txt"
@@ -23,27 +26,6 @@ if (FLAG == 1) {
 fd.sort <- function(x) {
     sorted = sort(x, decreasing = T, index.return = T)
     return(sorted)
-}
-ParetoScale <- function(x) {
-    return(apply(
-        X = x,
-        MARGIN = 2,
-        FUN = function(x)
-            (x - mean(x)) / sqrt(sd(x))
-    ))
-}
-add_euclidean_distance <- function(x) {
-    x = cbind(x, sqrt((x[, 1]) ^ 2 + (x[, 2]) ^ 2))
-    colnames(x)[3] = "Euclidean Distance"
-    return(x)
-}
-ParetoScale <- function(x) {
-    return(apply(
-        X = x,
-        MARGIN = 2,
-        FUN = function(x)
-            (x - mean(x)) / sqrt(sd(x))
-    ))
 }
 filter_zero <- function(x) {
     x = x[which(x != 0)]
@@ -144,59 +126,34 @@ DrawFigures <-
     }
 
 # Data ####
-f = as.data.frame(fread(input = bucket_table_name, header = T))
-f.d = f[, 2:length(f)]  # Take only the numerical values
-
+f = get_spectral_file(bucket_table_name)
+f.d = get_spectral_data(f)
 ### Add the row and column names
 #Specific pattern depending on naming convention
 # pattern = "[A-Z]\\d+" #For both datasets
-pattern = "[A-Z]{4}\\d+_[A-Z, 0-9]*"
-rownames(f.d) = str_extract(string = f[, 1], pattern = pattern) # For larger dataset
-# rownames(f.d)[4:dim(f.d)[1]] = str_extract(string = f[4:dim(f)[1] ,1],
-#                             pattern = pattern) # For smaller dataset
-# rownames(f.d)[1:3] = c("B499", "A165", "A2171") # For smaller dataset
-# Generic pattern for column names assuming data is in min not seconds
-pattern = "(\\d+.\\d+)min : (\\d+.\\d+)m\\/z"
-colnames(f.d) = str_replace(string = colnames(f)[2:length(f)],
-                            pattern = pattern,
-                            replacement = "\\1_\\2")
+f.d = cleanup_rows(
+    dataframe = f.d,
+    dirty_rownames = f[, 1],
+    pattern = "[A-Z]{4}\\d+_[A-Z, 0-9]*"
+)
+f.d = cleanup_cols(dataframe = f.d)
 ### Apply Pareto Scaling
-f.d.scaled.pareto = as.data.frame(ParetoScale(f.d))
+f.d.scaled.pareto = as.data.frame(pareto_scale(matrix = f.d))
 ### Run the PCA (scaling and centering has been done above)
 fd.pca = prcomp(x = f.d.scaled.pareto,
                 scale. = F,
                 center = F)
-## Figure containing Loadings plot with color and graph showing how quickly Euclidean Distance decreases in a typical loadings plot.
-d = fd.pca$rotation[, 1:2]
-d = as.data.frame(add_euclidean_distance(d))
-d = d[order(d$`Euclidean Distance`, decreasing = T), ]
-d$col = rep(c("red", "blue", "green", "orange"),
-            times = c(2000, 2000, 2000, dim(d)[1] - 6000))
+## Figure containing Loadings plot with color and graph showing how quickly
+## Euclidean Distance decreases in a typical loadings plot.
 tiff(
-    filename = "Colored-Loadings-smaller-dataset.tiff",
+    filename = "Colored-Loadings.tiff",
     width = 12,
     height = 6,
     units = "in",
     res = 300
 )
-par(mfrow = c(1, 2))
-plot(
-    x = d$PC1,
-    y = d$PC2,
-    pch = 16,
-    col = d$col,
-    xlab = "PC1",
-    ylab = "PC2",
-    main = "Loadings Plot"
-)
-plot(
-    x = d$`Euclidean Distance`,
-    pch = 16,
-    col = d$col,
-    xlab = "Index",
-    ylab = "Euclidean Distance",
-    main = "Euclidean Distance vs Index"
-)
+source("~/Programming/R/PoPCAR/colored_loadings.R")
+colored_loadings(PCA = fd.pca, ntimes = 4)
 dev.off()
 
 ### Highest PCs
@@ -206,8 +163,11 @@ fd.highestPCs = as.data.frame(apply(
     FUN = function(i)
         fd.sort(i)
 ))
-fd.highestPCs = fd.highestPCs[, which(str_detect(string = colnames(fd.highestPCs),
-                                                 pattern = ".ix"))]
+
+
+fd.highestPCs = fd.highestPCs[, which(
+    str_detect(string = colnames(fd.highestPCs),
+               pattern = ".ix"))]
 colnames(fd.highestPCs) = str_replace(
     string = colnames(fd.highestPCs),
     pattern = ".ix",
