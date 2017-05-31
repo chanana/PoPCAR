@@ -5,6 +5,7 @@ add_mass_column <-
         dataframe$m = str_replace(string = rnames,
                                   pattern = ".*_",
                                   replacement = "")
+        dataframe$m = sapply(dataframe$m, as.numeric)
         return(dataframe)
     }
 
