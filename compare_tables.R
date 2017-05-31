@@ -79,21 +79,28 @@ get_merged_dataframe <- function(dataframe_a, dataframe_b,
 #     sort = F
 # )
 
-e = add_mass_column(t(b4.d), rnames = rownames(b4.d))
-
-in_single_but_not_double = b4_4dup[is.na(b4_4dup$B499.y), ]
-in_double_but_not_single = b4_4dup[is.na(b4_4dup$B499.x), ]
-
-in_single_but_not_double$m = str_replace(
-    string = in_single_but_not_double$Row.names,
-    pattern = ".*_",
-    replacement = ""
-)
-in_double_but_not_single$m = str_replace(
-    string = in_double_but_not_single$Row.names,
-    pattern = ".*_",
-    replacement = ""
-)
+get_differences <- function(md, name){
+    #md is the merged dataframe
+    colnames(md)[2:3] = c('a', 'b')
+    md = add_mass_column(md, rnames = md$Row.names)
+    a_not_b = md[is.na(md$b), ]
+    b_not_a = md[is.na(md$a), ]
+}
+# e = add_mass_column(t(b4.d), rnames = rownames(b4.d))
+#
+# in_single_but_not_double = b4_4dup[is.na(b4_4dup$B499.y), ]
+# in_double_but_not_single = b4_4dup[is.na(b4_4dup$B499.x), ]
+#
+# in_single_but_not_double$m = str_replace(
+#     string = in_single_but_not_double$Row.names,
+#     pattern = ".*_",
+#     replacement = ""
+# )
+# in_double_but_not_single$m = str_replace(
+#     string = in_double_but_not_single$Row.names,
+#     pattern = ".*_",
+#     replacement = ""
+# )
 
 in_single_but_not_double = in_single_but_not_double[order(as.numeric(in_single_but_not_double$m), decreasing = T), ]
 in_double_but_not_single = in_double_but_not_single[order(as.numeric(in_double_but_not_single$m), decreasing = T), ]

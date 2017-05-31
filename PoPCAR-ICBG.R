@@ -10,8 +10,7 @@ source("~/Programming/R/PoPCAR/edit_data.R")
 source("~/Programming/R/PoPCAR/colored_loadings.R")
 # bucket_table_name = "A133-B531.txt"
 # bucket_table_name = "smaller-dataset-bucket.txt"
-bucket_table_name = "Hits-All3Media.txt"
-colors = rainbow_hcl(4)
+bucket_table_name = "12Strains.txt"
 FLAG = 1 # Set to 1 if you want to include Antibase
 if (FLAG == 1) {
     ppm = 2 # Can be changed to allow user to input desired accuracy
@@ -127,16 +126,17 @@ DrawFigures <-
 
 # Data ####
 f = get_spectral_file(bucket_table_name)
-f.d = get_spectral_data(f)
+f.d = get_spectral_data(spectral_file = f, replicates = 3)
 ### Add the row and column names
 #Specific pattern depending on naming convention
 # pattern = "[A-Z]\\d+" #For both datasets
 f.d = cleanup_rows(
     dataframe = f.d,
     dirty_rownames = f[, 1],
-    pattern = "[A-Z]{4}\\d+_[A-Z, 0-9]*"
+    replicates = 3
+    # pattern = "[A-Z]{4}\\d+_[A-Z, 0-9]*"
 )
-f.d = cleanup_cols(dataframe = f.d)
+f.d = cleanup_cols(dataframe = f.d, t = "s")
 ### Apply Pareto Scaling
 f.d.scaled.pareto = as.data.frame(pareto_scale(matrix = f.d))
 ### Run the PCA (scaling and centering has been done above)
@@ -152,8 +152,7 @@ tiff(
     units = "in",
     res = 300
 )
-source("~/Programming/R/PoPCAR/colored_loadings.R")
-colored_loadings(PCA = fd.pca, ntimes = 7, npoints = 1000, PCx = 10, PCy = 8)
+colored_loadings(PCA = fd.pca, ntimes = 5, npoints = 2000, PCx = 2, PCy = 4)
 dev.off()
 
 ### Highest PCs
@@ -173,7 +172,9 @@ colnames(fd.highestPCs) = str_replace(
     pattern = ".ix",
     replacement = ""
 )
-## To get pareto scaled data back scores %*% t(loadings)
+# to get the highest PCs for a particular strain, do fd.highestPCs[, ''] with
+# the strain name in the single quotes.
+# To get pareto scaled data back scores %*% t(loadings)
 #invisible(fd.pca$x %*% t(fd.pca$rotation)) #invisible hides output
 
 ### Get unique masses
@@ -246,11 +247,12 @@ for (r in 1:(dim(f.d)[1])) {
         by.y = 'm',
         sort = F
     ) # merge on keys
-    zd = zd[order(zd$`Euclidean Distance`, decreasing = T), ] # sort by Euclidean distance
+    zd = add_euclidean_distance(dataframe = zd, x = zd[, 4], y = zd[, 5])
+    zd = zd[order(zd$ed, decreasing = T), ] # sort by Euclidean distance
     colnames(zd)[2] = "Intensity"
     zd = zd[, c(3, 1, 2, 4, 5, 6)]
     if (dim(zd)[1] >= 100) {
-        zd = zd[1:100, ]
+        zd = zd[1:150, ]
     }
     ## DRAW FIGURE!
     DrawFigures(paste(rownames(fd.pca$x)[r], ".tiff", sep = ""), r)

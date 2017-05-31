@@ -1,6 +1,6 @@
 #Draw Colored Loadings
 colored_loadings <- function(PCA, PCx = 1, PCy = 2, npoints = 2000, ntimes = 3) {
-    d = as.data.frame(PCA$rotation[, PCx:PCy])
+    d = as.data.frame(PCA$rotation[, c(PCx, PCy)])
     d = add_euclidean_distance(d)
     d = d[order(d$ed, decreasing = T), ]
     c = c(rainbow(ntimes + 1))
