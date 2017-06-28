@@ -8,7 +8,16 @@ add_mass_column <-
         dataframe$m = sapply(dataframe$m, as.numeric)
         return(dataframe)
     }
-
+add_rt_column <-
+    function(dataframe, rnames = rownames(dataframe)) {
+        # Adds a column containing rt to the dataframe.
+        dataframe = as.data.frame(dataframe)
+        dataframe$rt = str_replace(string = rnames,
+                                  pattern = "_.*",
+                                  replacement = "")
+        dataframe$rt = sapply(dataframe$rt, as.numeric)
+        return(dataframe)
+    }
 pareto_scale <- function(matrix, column = 2) {
     # Returns the pareto scaled version of the each column/row of the matrix.
     return(apply(
