@@ -10,7 +10,7 @@ source("~/Programming/R/PoPCAR/edit_data.R")
 source("~/Programming/R/PoPCAR/colored_loadings.R")
 # bucket_table_name = "A133-B531.txt"
 # bucket_table_name = "smaller-dataset-bucket.txt"
-bucket_table_name = "Hits-All3Media.txt"
+bucket_table_name = "12Strains.txt"
 FLAG = 1 # Set to 1 if you want to include Antibase
 if (FLAG == 1) {
     ppm = 2 # Can be changed to allow user to input desired accuracy
@@ -126,17 +126,17 @@ DrawFigures <-
 
 # Data ####
 f = get_spectral_file(bucket_table_name)
-f.d = get_spectral_data(spectral_file = f, replicates = 1)
+f.d = get_spectral_data(spectral_file = f, replicates = 3)
 ### Add the row and column names
 #Specific pattern depending on naming convention
 # pattern = "[A-Z]\\d+" #For both datasets
 f.d = cleanup_rows(
     dataframe = f.d,
     dirty_rownames = f[, 1],
-    replicates = 1,
-    pattern = "[A-Z]{4}\\d+_[A-Z, 0-9]*"
+    replicates = 3
+    # pattern = "[A-Z]{4}\\d+_[A-Z, 0-9]*"
 )
-f.d = cleanup_cols(dataframe = f.d, t = "min")
+f.d = cleanup_cols(dataframe = f.d, t = "s")
 ### Apply Pareto Scaling
 f.d.scaled.pareto = as.data.frame(pareto_scale(matrix = f.d))
 ### Run the PCA (scaling and centering has been done above)
